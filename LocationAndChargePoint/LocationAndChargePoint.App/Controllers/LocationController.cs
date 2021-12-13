@@ -44,8 +44,13 @@ namespace LocationAndChargePoint.App.Controllers
         {
             try
             {
-                await _service.CreateLocation(model);
-                return Ok(model);
+                if (Enum.IsDefined(typeof(LACP.Models.Type), model.Type))
+                {
+                    await _service.CreateLocation(model);
+                    return Ok(model);
+                }
+                else
+                    return BadRequest("Type: " + model.Type);
             }
             catch (Exception e)
             {
@@ -60,11 +65,17 @@ namespace LocationAndChargePoint.App.Controllers
             {
                 if (id == model.LocationId)
                 {
-                    await _service.EditLocation(model);
-                    return Ok();
+                    if (Enum.IsDefined(typeof(LACP.Models.Type), model.Type))
+                    {
+                        await _service.EditLocation(model);
+                        return Ok();
+                    }
+                    else
+                        return BadRequest("Type: " + model.Type);
+
                 }
                 else
-                    return BadRequest();
+                    return BadRequest("Id: " + model.LocationId);
             }
             catch (Exception e)
             {
@@ -79,11 +90,26 @@ namespace LocationAndChargePoint.App.Controllers
             {
                 if (id == model.LocationId)
                 {
-                    await _service.InsertChargePoints(model);
-                    return Ok();
+                    List<string> idsOfChargePoints = new List<string>();
+                    foreach (ChargePointViewModel cpvm in model.ChargePoints)
+                    {
+                        if (!Enum.IsDefined(typeof(Status), cpvm.Status))
+                        {
+                            idsOfChargePoints.Add(cpvm.ChargePointId);
+                        }
+                    }
+                    if (idsOfChargePoints.Count > 0)
+                    {
+                        return BadRequest("Number of ChargePoints with wrong Status written: " + idsOfChargePoints.Count);
+                    }
+                    else
+                    {
+                        await _service.InsertChargePoints(model);
+                        return Ok();
+                    }
                 }
                 else
-                    return BadRequest();
+                    return BadRequest("Id: " + model.LocationId);
             }
             catch (Exception e)
             {

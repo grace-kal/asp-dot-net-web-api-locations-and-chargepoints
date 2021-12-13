@@ -34,7 +34,6 @@ namespace LocationAndChargePoint.App.Services
         {
             if (!model.Equals(null))
             {
-                //Location loc = await GetLocation(model.LocationId);
                 if (await LocationExists(model.LocationId))
                 {
                     //update only existing val
@@ -59,18 +58,38 @@ namespace LocationAndChargePoint.App.Services
 
         public async Task InsertChargePoints(ChargePointRequestViewModel model)
         {
-            //foreach (ChargePointViewModel cprvm in model.ChargePoints)
-            //{
-            //    ChargePoint cp = _mapper.Map<ChargePoint>(cprvm);
-            //    cp.LocationId = model.LocationId;
-            //}
-            foreach (ChargePointViewModel cp in model.ChargePoints)
+            List<ChargePoint> cpsInLocation = await ChargePointsInLocation(model.LocationId);
+            ChargePointRequest cpsGiven = _mapper.Map<ChargePointRequest>(model);
+            
+            foreach (ChargePoint cp in cpsInLocation)
             {
-                ChargePoint newCp = _mapper.Map<ChargePoint>(cp);
-                newCp.LocationId = model.LocationId;
-                await _context.ChargePoints.AddAsync(newCp);
+                if (!cpsGiven.ChargePoints.Contains(cp))
+                {
+                    cp.Status = "Removed";
+                    cp.LastUpdated = DateTime.Now;
+                    _context.ChargePoints.Update(cp);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            foreach (ChargePoint cp in cpsGiven.ChargePoints)
+            {
+                cp.LocationId = cpsGiven.LocationId;
+                await _context.ChargePoints.AddAsync(cp);
                 await _context.SaveChangesAsync();
             }
+            //foreach (ChargePointViewModel cpvm in model.ChargePoints)
+            //{
+            //    ChargePoint newCp = _mapper.Map<ChargePoint>(cpvm);
+            //    newCp.LocationId = model.LocationId;
+            //    await _context.ChargePoints.AddAsync(newCp);
+            //    await _context.SaveChangesAsync();
+            //}
+        }
+        public async Task<List<ChargePoint>> ChargePointsInLocation(string id)//id of location
+        {
+            List<ChargePoint> cpsInLocation = await _context.ChargePoints.Where(cp => cp.LocationId == id).ToListAsync();
+            return cpsInLocation;
+            
         }
     }
 }

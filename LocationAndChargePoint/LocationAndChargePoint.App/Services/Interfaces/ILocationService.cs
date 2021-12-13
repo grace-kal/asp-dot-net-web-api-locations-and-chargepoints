@@ -17,7 +17,11 @@ namespace LocationAndChargePoint.App.Services.Interfaces
         Task EditLocation(PatchLocationRequest model);
         //put charge points in the location
         Task InsertChargePoints(ChargePointRequestViewModel model);
+        //check if location exists
+        Task<bool> LocationExists(string id);
         //get location
         Task<Location> GetLocation(string id);
+        //check if a charge point exists
+        Task<List<ChargePoint>> ChargePointsInLocation(string id);
     }
 }

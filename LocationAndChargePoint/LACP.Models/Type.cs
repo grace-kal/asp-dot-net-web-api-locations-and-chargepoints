@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace LACP.Models
 {
-    enum Type
+    public enum Type
     {
-     
+        Parking=1,
+        Airport=2,
+        OnStreet=3,
+        Unknown=4
     }
 }
