@@ -24,6 +24,7 @@ namespace LocationAndChargePoint.App.Services
         {
             if (!model.Equals(null))
             {
+                //mapping the given LocationRequest model to Location model
                 Location loc = _mapper.Map<Location>(model);
                 await _context.Locations.AddAsync(loc);
                 await _context.SaveChangesAsync();
@@ -37,7 +38,8 @@ namespace LocationAndChargePoint.App.Services
                 if (await LocationExists(model.LocationId))
                 {
                     //update only existing val
-                    var loc = _mapper.Map<Location>(model);
+                    //mapping the given PatchLocationRequest model to Location model
+                    Location loc = _mapper.Map<Location>(model);
                     _context.Attach(loc);
                     _context.Locations.Update(loc);
                     await _context.SaveChangesAsync();
@@ -77,13 +79,6 @@ namespace LocationAndChargePoint.App.Services
                 await _context.ChargePoints.AddAsync(cp);
                 await _context.SaveChangesAsync();
             }
-            //foreach (ChargePointViewModel cpvm in model.ChargePoints)
-            //{
-            //    ChargePoint newCp = _mapper.Map<ChargePoint>(cpvm);
-            //    newCp.LocationId = model.LocationId;
-            //    await _context.ChargePoints.AddAsync(newCp);
-            //    await _context.SaveChangesAsync();
-            //}
         }
         public async Task<List<ChargePoint>> ChargePointsInLocation(string id)//id of location
         {
